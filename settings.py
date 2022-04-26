@@ -1,6 +1,7 @@
 # communication settings
 import math
 
+# HOST = "132.64.143.247"
 HOST = "127.0.0.1"
 PORT = 5432
 FORMAT = 'utf-8'

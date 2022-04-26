@@ -26,6 +26,7 @@ class ClientAgent:
     def establish_connection(self):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.connect((s.HOST, s.PORT))
+        print("connection created")
 
     def initialize_structures(self):
 
