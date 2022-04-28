@@ -10,7 +10,10 @@ class Block:
         self.data = data
 
     def __repr__(self):
-        return "name: {}   data: {}".format(self.name, self.data)
+        return "Block -> name: {}, data: {}".format(self.name, self.data)
+
+    def __eq__(self, other):
+        return self.name == other.name and self.data == other.data
 
 
 

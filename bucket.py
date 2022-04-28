@@ -26,3 +26,18 @@ class Bucket:
 
         self.blocks[self.size] = block
         self.size += 1
+
+    def __repr__(self):
+        output = "Bucket -> size {}, contains: [".format(self.size)
+        for b in [block for block in self.blocks if block.name is not None]:
+            output += str(b)
+            output += ", "
+        output += "]"
+        return output
+
+    def __eq__(self, other):
+        return self.size == other.size and self.blocks == other.blocks
+
+    def __hash__(self):
+        return hash(str(self))
+
