@@ -27,5 +27,5 @@ data in each block, you may need to change `settings.RECEIVE_BYTES`.
 * `settings.py` contains all of the constants and data we supply to the program. change all from here.
 
 
-<h2>Files</h2>
+<h2>Run</h2>
 Just write `$python3 server.py` on the server, and `$python3 client.py` on the client.
