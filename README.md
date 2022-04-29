@@ -1,7 +1,7 @@
-<h1>ORAM</h1>
+# ORAM
 
 
-<h2>oram python implementation</h2>
+## oram python implementation
 
 implementation of server and client communicating via socket under: </br>
 
@@ -12,8 +12,8 @@ implementation of server and client communicating via socket under: </br>
 
 oram protocol based on the article [Path ORAM](https://eprint.iacr.org/2013/280.pdf).
 
-<h2>Files</h2>
-* Run `server.py` on the server. <br>
+## Files
+*  Run ` server.py ` on the server. <br>
 You can call `Server.run()` or `Server.run_multicore()` to support multiple connections.
 * With `Client` in `client.py`, 
 You can write and read in the `__name__ == "__main__"` section,
@@ -27,5 +27,5 @@ data in each block, you may need to change `settings.RECEIVE_BYTES`.
 * `settings.py` contains all of the constants and data we supply to the program. change all from here.
 
 
-<h2>Run</h2>
+## Run
 Just write `$python3 server.py` on the server, and `$python3 client.py` on the client.
