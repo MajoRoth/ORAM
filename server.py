@@ -25,7 +25,7 @@ class Server:
 
     def run(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
-            server.bind((settings.HOST, settings.PORT))
+            server.bind((settings.SERVER_HOST, settings.PORT))
             server.listen()
             conn, addr = server.accept()
             with conn:
@@ -33,7 +33,7 @@ class Server:
                     print("{}Results: connected by {} {}".format('\033[92m', addr, '\033[0m'))
 
                 while True:
-                    data = conn.recv(1024)
+                    data = conn.recv(settings.RECEIVE_BYTES)
                     if data:
                         data = data.decode(settings.FORMAT)
 
@@ -47,7 +47,7 @@ class Server:
                             option = "write"
                             index = re.split("^write ", data)[1]
                             conn.sendall("got {}".format(index).encode(settings.FORMAT))
-                            encrypted_bucket = conn.recv(1024)
+                            encrypted_bucket = conn.recv(settings.RECEIVE_BYTES)
                             self.write(int(index), encrypted_bucket)
                             conn.sendall("got {}".format(encrypted_bucket).encode(settings.FORMAT))
 
@@ -86,7 +86,7 @@ class Server:
 
         connected = True
         while connected:
-            data = conn.recv(1024)
+            data = conn.recv(settings.RECEIVE_BYTES)
             if data:
                 data = data.decode(settings.FORMAT)
 
@@ -100,7 +100,7 @@ class Server:
                     option = "write"
                     index = re.split("^write ", data)[1]
                     conn.sendall("got {}".format(index).encode(settings.FORMAT))
-                    encrypted_bucket = conn.recv(1024)
+                    encrypted_bucket = conn.recv(settings.RECEIVE_BYTES)
                     self.write(int(index), encrypted_bucket)
                     conn.sendall("got {}".format(encrypted_bucket).encode(settings.FORMAT))
 
@@ -135,7 +135,7 @@ class Server:
 
     def run_multicore(self):
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server.bind((settings.HOST, settings.PORT))
+        server.bind((settings.CLIENT_HOST, settings.PORT))
         server.listen()
 
         while True:

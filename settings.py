@@ -15,8 +15,8 @@ DEBUG_KEY = b'ReJz38RFeJp35qFaSN9eahxHnp-KoCapsBelvJz6Ev0='
 """
     communication settings
 """
-# HOST = "132.64.143.247"
-HOST = "127.0.0.1"
+SERVER_HOST = "127.0.0.1"
+CLIENT_HOST = "127.0.0.1"
 PORT = 5434
 FORMAT = 'utf-8'
 
@@ -27,7 +27,6 @@ FORMAT = 'utf-8'
 N = 64 - 1
 L = int(math.log2(N + 1))
 BUCKET_SIZE = int(math.log2(N+1)) # Z
-BLOCK_SIZE = 4
-
+RECEIVE_BYTES = 1024
 
 

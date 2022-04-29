@@ -23,12 +23,13 @@ class ClientAgent:
         self.stash: list[Block] = list()  # list of blocks
         self.position_map: dict[str: int] = dict()  # ("name": position)
         self.hash_table: dict[Bucket: bytes] = dict()
+        self.multicore_indexes = list()  # list of blocks that currently we work on
 
     def establish_connection(self):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server.connect((s.HOST, s.PORT))
+        self.server.connect((s.CLIENT_HOST, s.PORT))
         if settings.LOG.value >= settings.Log.Results.value:
-            print("{}Results: connection created with {}: {} {}".format('\033[92m', s.HOST, s.PORT, '\033[0m'))
+            print("{}Results: connection created with {}: {} {}".format('\033[92m', s.CLIENT_HOST, s.PORT, '\033[0m'))
 
     def initialize_structures(self):
 
