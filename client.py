@@ -1,5 +1,6 @@
 from clientAgent import ClientAgent
 from block import Block
+import settings
 
 class Client:
 
@@ -12,7 +13,12 @@ class Client:
         self.client_agent.oram_write(name=name, block=block)
 
     def read(self, name):
-        return self.client_agent.oram_read(name=name)
+        result = self.client_agent.oram_read(name=name)
+        if settings.LOG.value >= settings.Log.Results.value:
+            print("{}Result: read {} {}".format('\033[92m', result, '\033[0m'))
+        return result
+
+
 
 
 if __name__ == "__main__":
@@ -21,11 +27,7 @@ if __name__ == "__main__":
     for i in range(0, 400):
         bl = Block("n{}".format(i), b"123")
         c.write("n{}".format(i), bl)
-        print(bl)
-    print()
-    print()
 
     for i in range(0, 400):
         nbl = c.read("n{}".format(i))
-        print("read block ")
-        print(nbl)
+

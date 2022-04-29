@@ -1,5 +1,6 @@
 import socket
 import re
+import threading
 
 import settings
 
@@ -28,7 +29,9 @@ class Server:
             server.listen()
             conn, addr = server.accept()
             with conn:
-                print(f"LOG: Connected by {addr}")
+                if settings.LOG.value >= settings.Log.Results.value:
+                    print("{}Results: connected by {} {}".format('\033[92m', addr, '\033[0m'))
+
                 while True:
                     data = conn.recv(1024)
                     if data:
@@ -39,31 +42,28 @@ class Server:
                             index = re.split("^read ", data)[1]
                             bucket = self.read(int(index))
                             conn.sendall(bucket)
-                            if settings.DEBUG:
-                                print("reading {}".format(bucket))
 
                         elif re.findall("^write ", data):  # write {name} {data}
                             option = "write"
                             index = re.split("^write ", data)[1]
                             conn.sendall("got {}".format(index).encode(settings.FORMAT))
-                            data = conn.recv(1024)
-                            self.write(int(index), data)
-                            conn.sendall("got {}".format(data).encode(settings.FORMAT))
-                            if settings.DEBUG:
-                                from cryptography.fernet import Fernet
-                                import pickle
+                            encrypted_bucket = conn.recv(1024)
+                            self.write(int(index), encrypted_bucket)
+                            conn.sendall("got {}".format(encrypted_bucket).encode(settings.FORMAT))
 
-                                f = Fernet(settings.DEBUG_KEY)
-                                bucket = pickle.loads(f.decrypt(data))
-                                print(" ")
-                                print("writing {} in pos {}".format(str(bucket), index))
+                        elif re.findall("^close", data):
+                            server.close()
+                            conn.sendall("closed".encode(settings.FORMAT))
 
+                            break
 
                         else:
-                            print("LOG: invalid command {}".format(data))
+                            if settings.LOG.value >= settings.Log.Errors.value:
+                                print("{}Error: invalid command {} {}".format('\033[91m', data, '\033[0m'))
+
                             conn.sendall("invalid command {}".format(data).encode(settings.FORMAT))
 
-                        if settings.DEBUG:
+                        if settings.LOG.value >= settings.Log.Debug.value:
                             from cryptography.fernet import Fernet
                             import pickle
 
@@ -73,13 +73,84 @@ class Server:
                             for b in self.buckets:
                                 if b == b'0':
                                     continue
-                                i+= 1
+
                                 print("[{}]:". format(i), end= ' ')
                                 bucket = pickle.loads(f.decrypt(b))
                                 print(bucket)
+                                i += 1
+
+
+    def handle_client(self, conn, addr):
+        if settings.LOG.value >= settings.Log.Results.value:
+            print("{}Results: connected {} {}".format('\033[92m', conn, '\033[0m'))
+
+        connected = True
+        while connected:
+            data = conn.recv(1024)
+            if data:
+                data = data.decode(settings.FORMAT)
+
+                if re.findall("^read ", data):  # read {name}
+                    option = "read"
+                    index = re.split("^read ", data)[1]
+                    bucket = self.read(int(index))
+                    conn.sendall(bucket)
+
+                elif re.findall("^write ", data):  # write {name} {data}
+                    option = "write"
+                    index = re.split("^write ", data)[1]
+                    conn.sendall("got {}".format(index).encode(settings.FORMAT))
+                    encrypted_bucket = conn.recv(1024)
+                    self.write(int(index), encrypted_bucket)
+                    conn.sendall("got {}".format(encrypted_bucket).encode(settings.FORMAT))
+
+                elif re.findall("^close", data):
+                    conn.sendall("closed".encode(settings.FORMAT))
+                    connected = False
+
+                else:
+                    if settings.LOG.value >= settings.Log.Errors.value:
+                        print("{}Error: invalid command {} {}".format('\033[91m', data, '\033[0m'))
+
+                    conn.sendall("invalid command {}".format(data).encode(settings.FORMAT))
+
+                if settings.LOG.value >= settings.Log.Debug.value:
+                    from cryptography.fernet import Fernet
+                    import pickle
+
+                    f = Fernet(settings.DEBUG_KEY)
+                    print("=== DEBUG {} {} ===".format(option, index))
+                    i = 0
+                    for b in self.buckets:
+                        if b == b'0':
+                            continue
+
+                        print("[{}]:".format(i), end=' ')
+                        bucket = pickle.loads(f.decrypt(b))
+                        print(bucket)
+                        i += 1
+
+        conn.close()
+
+
+    def run_multicore(self):
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.bind((settings.HOST, settings.PORT))
+        server.listen()
+
+        while True:
+            conn, addr = server.accept()
+            print(conn)
+            thread = threading.Thread(target=self.handle_client, kwargs={"conn": conn, "addr": addr})
+            thread.start()
+            if settings.LOG.value >= settings.Log.Results.value:
+                print("{}Results: thread activated {} {}".format('\033[92m', addr, '\033[0m'))
+
+
+
 
 
 
 if __name__ == "__main__":
     server = Server()
-    server.run()
+    server.run_multicore()

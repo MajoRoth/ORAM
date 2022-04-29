@@ -12,24 +12,23 @@ from block import Block
 
 
 class ClientAgent:
-    LOG = True
 
     def __init__(self):
-        if settings.DEBUG:
+        if settings.LOG.value >= settings.Log.Debug.value:
             self.key = settings.DEBUG_KEY
         else:
             self.key = Fernet.generate_key()
         self.f = Fernet(self.key)
-        self.server = None
+        self.server: socket.socket = None
         self.stash: list[Block] = list()  # list of blocks
         self.position_map: dict[str: int] = dict()  # ("name": position)
         self.hash_table: dict[Bucket: bytes] = dict()
 
-
     def establish_connection(self):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.connect((s.HOST, s.PORT))
-        print("connection created with {}: {}".format(s.HOST, s.PORT))
+        if settings.LOG.value >= settings.Log.Results.value:
+            print("{}Results: connection created with {}: {} {}".format('\033[92m', s.HOST, s.PORT, '\033[0m'))
 
     def initialize_structures(self):
 
@@ -80,10 +79,9 @@ class ClientAgent:
             if b.name == name:
                 return b
 
-        class StashError(Exception):
-            """Raised when the block is not in the stash."""
-            pass
-        raise StashError
+        if settings.LOG.value >= settings.Log.Errors.value:
+            print("{}Error: block was not found in stash{}".format('\033[91m', '\033[0m'))
+        return None
 
     def check_stash_availability(self):
         if len(self.stash) >= settings.N:
@@ -119,7 +117,7 @@ class ClientAgent:
         return data
 
     def oram_write(self, name: str, block: Block):
-        if settings.WARNING:
+        if settings.LOG.value >= settings.Log.Debug.value:
             self.check_stash_availability()
 
         # choose new position
@@ -134,7 +132,6 @@ class ClientAgent:
         for bucket in self.get_buckets_in_path(path):
             self.stash += [block for block in bucket.blocks if block.name is not None]
 
-        # self.delete_duplicates_from_stash()
         self.replace_block_from_stash(block)
 
         temp_stash = list()
@@ -175,11 +172,9 @@ class ClientAgent:
         decrypted_pickled_bucket = self.f.decrypt(pickled_bucket)
         bucket = pickle.loads(decrypted_pickled_bucket)
 
-        if self.hash_bucket(decrypted_pickled_bucket) != self.hash_table[bucket]:
-            class UntrustedDataError(Exception):
-                """Raised when the hash of the bucket from the server does not match to the value in the hash table."""
-                pass
-            raise UntrustedDataError
+        if settings.LOG.value >= settings.Log.Errors.value and self.hash_bucket(decrypted_pickled_bucket) != self.hash_table[bucket]:
+            print("{}Error: hash of bucket does not equal to the saved hash{}".format('\033[91m', '\033[0m'))
+
         return bucket
 
     def hash_bucket(self, pickled_bucket: bytes):
