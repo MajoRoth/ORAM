@@ -29,3 +29,6 @@ data in each block, you may need to change `settings.RECEIVE_BYTES`.
 
 ## Run
 Just write `$python3 server.py` on the server, and `$python3 client.py` on the client.
+
+
+## Benchmarks
