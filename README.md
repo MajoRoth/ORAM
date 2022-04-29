@@ -1,8 +1,8 @@
 <h1>ORAM</h1>
-----------------------
+
 
 <h2>oram python implementation</h2>
-----------------------
+
 implementation of server and client communicating via socket under: </br>
 
 * End to end encryption.
