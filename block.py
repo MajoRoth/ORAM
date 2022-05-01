@@ -1,8 +1,6 @@
-import settings
 
 
 class Block:
-
     def __init__(self, name: str = None, data: bytes = None):
         self.name = name
         self.data = data

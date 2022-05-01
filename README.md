@@ -13,8 +13,7 @@ implementation of server and client communicating via socket under: </br>
 oram protocol based on the article [Path ORAM](https://eprint.iacr.org/2013/280.pdf).
 
 ## Files
-*  Run ` server.py ` on the server. <br>
-You can call `Server.run()` or `Server.run_multicore()` to support multiple connections.
+*  Run ` server.py ` on the server. call `Server.run()` to run the server.
 * With `Client` in `client.py`, 
 You can write and read in the `__name__ == "__main__"` section,
 or write your own code and call to `Client.read()` and `Client.write()`
@@ -31,4 +30,4 @@ data in each block, you may need to change `settings.RECEIVE_BYTES`.
 Just write `$python3 server.py` on the server, and `$python3 client.py` on the client.
 
 
-## Benchmarks
+### More information about the design can be found in DESIGN.pdf

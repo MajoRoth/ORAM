@@ -1,3 +1,4 @@
+import math
 import random
 from cryptography.fernet import Fernet
 import socket
@@ -13,7 +14,9 @@ from block import Block
 
 class ClientAgent:
 
-    def __init__(self):
+    def __init__(self, N):
+        self.N = N
+        self.L = int(math.log2(N + 1))
         if settings.LOG.value >= settings.Log.Debug.value:
             self.key = settings.DEBUG_KEY
         else:
@@ -23,7 +26,6 @@ class ClientAgent:
         self.stash: list[Block] = list()  # list of blocks
         self.position_map: dict[str: int] = dict()  # ("name": position)
         self.hash_table: dict[Bucket: bytes] = dict()
-        self.multicore_indexes = list()  # list of blocks that currently we work on
 
     def establish_connection(self):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -34,7 +36,7 @@ class ClientAgent:
     def initialize_structures(self):
 
         # fills the server with buckets
-        for i in range(settings.N):
+        for i in range(self.N):
             b = Bucket()
             b.fill_with_null_blocks()
             self.write_bucket(i, b)
@@ -50,7 +52,7 @@ class ClientAgent:
             else:
                 position = position * 2 + 2
 
-        for i in range(settings.L):
+        for i in range(self.L):
             result.append(position)
             position = (position-1)//2
 
@@ -85,13 +87,13 @@ class ClientAgent:
         return None
 
     def check_stash_availability(self):
-        if len(self.stash) >= settings.N:
+        if len(self.stash) >= self.N:
             print("{}Warning: stash size is too big. you should increase your server size{}".format('\033[93m', '\033[0m'))
 
     def oram_read(self, name: str):
         # choose new position
         position = self.position_map[name]
-        self.position_map[name] = random.randint(a=0, b=(settings.N - 1))
+        self.position_map[name] = random.randint(a=0, b=(self.N - 1))
 
         # get all the blocks in the path to the stash
         path = self.get_path(position)
@@ -101,7 +103,7 @@ class ClientAgent:
         data = self.get_block_from_stash(name)
         temp_stash = list()
 
-        for layer in range(settings.L-1, -1, -1):
+        for layer in range(self.L-1, -1, -1):
             bucket = Bucket()
             bucket.fill_with_null_blocks()
             pos = self.slice_path_by_layer(path, layer)
@@ -118,15 +120,15 @@ class ClientAgent:
         return data
 
     def oram_write(self, name: str, block: Block):
-        if settings.LOG.value >= settings.Log.Debug.value:
+        if settings.LOG.value >= settings.Log.Warnings.value:
             self.check_stash_availability()
 
         # choose new position
         if name not in self.position_map.keys():
-            self.position_map[name] = random.randint(a=0, b=(settings.N - 1))
+            self.position_map[name] = random.randint(a=0, b=(self.N - 1))
 
         position = self.position_map[name]
-        self.position_map[name] = random.randint(a=0, b=(settings.N - 1))
+        self.position_map[name] = random.randint(a=0, b=(self.N - 1))
 
         # get all the blocks in the path to the stash
         path = self.get_path(position)
@@ -137,7 +139,7 @@ class ClientAgent:
 
         temp_stash = list()
 
-        for layer in range(settings.L-1, -1, -1):
+        for layer in range(self.L-1, -1, -1):
             bucket = Bucket()
             bucket.fill_with_null_blocks()
             pos = self.slice_path_by_layer(path, layer)

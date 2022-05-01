@@ -1,4 +1,0 @@
-bitarray==2.4.1
-cffi==1.15.0
-cryptography==36.0.2
-pycparser==2.21
