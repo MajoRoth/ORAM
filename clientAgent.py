@@ -76,7 +76,6 @@ class ClientAgent:
         # if this blocks does not exist: write new
         self.stash.append(block)
 
-
     def get_block_from_stash(self, name: str):
         for b in self.stash:
             if b.name == name:
@@ -98,7 +97,7 @@ class ClientAgent:
         # get all the blocks in the path to the stash
         path = self.get_path(position)
         for bucket in self.get_buckets_in_path(path):
-            self.stash += [block for block in bucket.blocks if block.name is not None]
+            self.stash += bucket.read_all_none_null_blocks()
 
         data = self.get_block_from_stash(name)
         temp_stash = list()
@@ -133,7 +132,7 @@ class ClientAgent:
         # get all the blocks in the path to the stash
         path = self.get_path(position)
         for bucket in self.get_buckets_in_path(path):
-            self.stash += [block for block in bucket.blocks if block.name is not None]
+            self.stash += bucket.read_all_none_null_blocks()
 
         self.replace_block_from_stash(block)
 

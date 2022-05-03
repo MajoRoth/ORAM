@@ -12,6 +12,13 @@ class Bucket:
     def fill_with_null_blocks(self):
         self.blocks = [Block() for _ in range(Bucket.BUCKET_SIZE)]
 
+    def read_all_none_null_blocks(self):
+        result = list()
+        for i in range(self.size):
+            result.append(self.blocks[i])
+
+        return result
+
     def read_block(self):
         if self.size <= 0:
             print("bucket is empty: {}".format(self.size))

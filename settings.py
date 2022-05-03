@@ -9,7 +9,7 @@ class Log(Enum):
     Debug = 4
 
 
-LOG = Log.Warnings
+LOG = Log.Debug
 DEBUG_KEY = b'ReJz38RFeJp35qFaSN9eahxHnp-KoCapsBelvJz6Ev0='
 
 """
